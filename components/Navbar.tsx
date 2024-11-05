@@ -1,6 +1,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import React from 'react'
+import Divider from './Divider'
 
 const Navbar = () => {
     return (
@@ -44,7 +45,7 @@ const Navbar = () => {
                         </Link>
                     </ul>
                 </div>
-                <div className='h-[1px] w-full bg-white opacity-20' />
+                <Divider />
             </nav >
         </div>
     )
