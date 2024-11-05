@@ -7,7 +7,7 @@ const Navbar = () => {
     return (
         <div>
             <nav className='flex flex-col gap-4 mt-4'>
-                <div className='flex gap-2 justify-center items-center'>
+                <Link href='/' className='flex gap-2 justify-center items-center'>
                     <Image
                         src="/images/logo.png"
                         alt="logo"
@@ -15,8 +15,8 @@ const Navbar = () => {
                         height={32}
                         className='mt-1'
                     />
-                    <h1 className='text-[24px] font-bold text-[#C1F17E]'>Tjarra Angar</h1>
-                </div>
+                    <h1 className='text-[24px] font-bold text-secondary'>Tjarra Angar</h1>
+                </Link>
                 <div>
                     <ul className='flex gap-14 justify-center'>
                         <Link href='/'>

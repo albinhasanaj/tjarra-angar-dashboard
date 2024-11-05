@@ -1,10 +1,16 @@
 import Card from '@/components/Card'
 import Divider from '@/components/Divider'
+import Link from 'next/link'
 import React from 'react'
 
 const Homepage = () => {
   return (
-    <main className="flex flex-col items-center text-white mt-40 px-4">
+    <main className="flex flex-col items-center text-white mt-20 px-4">
+      <Link href="/create" className='mb-20'>
+        <div className='bg-secondary py-3 px-10 rounded-md'>
+          <h3 className='text-black '>Create new task</h3>
+        </div>
+      </Link>
       <h3 className="text-xl mb-4">Tasks assigned by date</h3>
       <Divider />
 
