@@ -12,6 +12,12 @@ const config: Config = {
         primary: "#080F17",
         secondary: "#C1F17E",
       },
+      screens: {
+        sm: "640px",
+        md: "768px",
+        lg: "1024px",
+        xl: "1280px",
+      },
     },
   },
   plugins: [],
