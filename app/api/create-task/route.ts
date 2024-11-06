@@ -33,7 +33,7 @@ export async function POST(request: Request) {
             },
         });
 
-        const uploadsDir = path.join(process.cwd(), 'app', 'uploads');
+        const uploadsDir = path.join(process.cwd(), 'public/uploads');
         await fs.mkdir(uploadsDir, { recursive: true });
 
         for (const [index, block] of contentBlocks.entries()) {

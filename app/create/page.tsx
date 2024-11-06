@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 
 interface ContentBlock {
     type: "text" | "image";
@@ -83,9 +84,11 @@ const Create: React.FC = () => {
             });
 
             if (response.ok) {
-                router.push("/tasks");
+                router.push("/");
+                toast.success("Task created successfully");
             } else {
                 console.error("Error creating task");
+                toast.error("Error creating task");
             }
         } catch (error) {
             console.error("Error submitting form", error);
@@ -146,7 +149,8 @@ const Create: React.FC = () => {
                             <label htmlFor="date" className="block text-white text-lg mt-4">
                                 Date
                             </label>
-                            <input type="date" id="date" name="date" className="border p-2 w-full bg-gray-700 text-white mt-2" />
+                            {/* default date to today */}
+                            <input type="date" id="date" name="date" className="border p-2 w-full bg-gray-700 text-white mt-2" defaultValue={new Date().toISOString().split("T")[0]} />
 
                             <label className="block text-white text-lg mt-4">Content</label>
                             <div className="border p-4 w-full bg-gray-800 mt-2 rounded">

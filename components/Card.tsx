@@ -2,13 +2,30 @@
 import Link from 'next/link'
 import React, { useState } from 'react'
 import { AiOutlineCheckCircle, AiOutlineCloseCircle } from 'react-icons/ai'
+import toast from 'react-hot-toast'
 
-const Card = ({ name, date, title, description, isDone }: { name: string, date: string, title: string, description: string, isDone: boolean }) => {
+const Card = ({ name, id, date, title, description, isDone }: { name: string, date: string, title: string, description: string, isDone: boolean, id: string }) => {
     const [done, setDone] = useState(isDone)
 
-    const handleDone = () => {
-        setDone(!done)
+
+    // fetch request to update the task status
+    const handleDone = async () => {
+        const res = await fetch('/api/update-task', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ id, completed: !done })
+        })
+
+        if (res.ok) {
+            setDone(!done)
+            toast.success('Task status updated successfully')
+        } else {
+            toast.error('Something went wrong')
+        }
     }
+
 
     return (
         <div className="w-full bg-white py-6 px-4 md:px-8 rounded-lg shadow-md flex flex-col md:grid md:grid-cols-4 gap-4 items-center text-gray-800">
@@ -26,7 +43,8 @@ const Card = ({ name, date, title, description, isDone }: { name: string, date: 
 
             {/* View More Link */}
             <div className="text-center md:text-right">
-                <Link href="#" className="text-blue-500 underline hover:text-blue-600 transition-colors duration-200">
+                <Link href="/tasks/[id]" as={`/tasks/${id}`}
+                    className="text-blue-500 underline hover:text-blue-600 transition-colors duration-200">
                     View more
                 </Link>
             </div>

@@ -10,14 +10,17 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// command to run when the schema is updated: npx prisma generate
+
 model Task {
-  id         Int      @id @default(autoincrement())
-  title      String
-  content    String?
-  assigneeId Int
-  assignee   Assignee @relation(fields: [assigneeId], references: [id])
-  completed  Boolean  @default(false)
-  createdAt  DateTime @default(now())
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String?
+  content     String?
+  assigneeId  Int
+  assignee    Assignee @relation(fields: [assigneeId], references: [id])
+  completed   Boolean  @default(false)
+  createdAt   DateTime @default(now())
 }
 
 model Assignee {

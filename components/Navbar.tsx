@@ -27,14 +27,17 @@ const Navbar: React.FC = () => {
                 <div>
                     <ul className='flex flex-wrap gap-4 md:gap-14 justify-center'>
                         {names.map((name) => {
-                            const namePath = `/${name.toLowerCase()}`
-                            const isActive = currentPath === namePath
+                            const namePath = `${name.toLowerCase()}`
+                            // const isActive = currentPath === namePath
+                            // check if it only includes the name, not case sensitive then active
+                            const isActive = currentPath.toLowerCase().includes(namePath)
+
 
                             return (
                                 <li key={name}>
-                                    <Link href={namePath}>
+                                    <Link href={`/userTasks/${namePath}`}>
                                         <span
-                                            className={`text-base md:text-lg font-semibold cursor-pointer hover:underline ${isActive ? 'text-white' : 'text-gray-500'
+                                            className={`text-base md:text-lg font-semibold cursor-pointer hover:text-white ${isActive ? 'text-white' : 'text-gray-500'
                                                 }`}
                                         >
                                             {name}
