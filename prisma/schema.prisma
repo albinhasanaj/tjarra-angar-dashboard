@@ -10,18 +10,18 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id    Int    @id @default(autoincrement())
-  name  String
-  email String @unique
-  posts Post[]
+model Task {
+  id         Int      @id @default(autoincrement())
+  title      String
+  content    String?
+  assigneeId Int
+  assignee   Assignee @relation(fields: [assigneeId], references: [id])
+  completed  Boolean  @default(false)
+  createdAt  DateTime @default(now())
 }
 
-model Post {
-  id        Int     @id @default(autoincrement())
-  title     String
-  content   String?
-  published Boolean @default(false)
-  author    User    @relation(fields: [authorId], references: [id])
-  authorId  Int
+model Assignee {
+  id    Int    @id @default(autoincrement())
+  name  String @unique
+  tasks Task[]
 }
