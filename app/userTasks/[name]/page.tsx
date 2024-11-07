@@ -2,42 +2,56 @@
 import React from 'react';
 import Card from '@/components/Card';
 import Divider from '@/components/Divider';
-import { PrismaClient } from '@prisma/client';
-import { format } from 'date-fns';
-import { sv } from 'date-fns/locale';
-
-const prisma = new PrismaClient();
 
 interface UserTasksProps {
-    params: { name: string };
+    params: Promise<{ name: string }>;
 }
 
-// Function to fetch tasks for a specific user by name
+interface Task {
+    id: string;
+    createdAt: string;
+    title: string;
+    description?: string;
+    completed: boolean;
+}
+
+
 async function getUserTasks(name: string) {
+    // Capitalize the first letter of the name
 
-    name = name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
+    try {
+        // Fetch tasks from the Express API
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/user-tasks/${name}`, {
+            cache: 'no-store',
+        });
 
-    const assignee = await prisma.assignee.findFirst({
-        where: { name },
-        include: { tasks: true },
-    });
+        if (!res.ok) {
+            // Handle HTTP errors
+            console.error(`HTTP error! status: ${res.status}`);
+            return [];
+        }
 
-    // Log the assignee and their tasks for debugging
-    console.log('Assignee:', assignee);
-    if (assignee) {
-        console.log('Tasks:', assignee.tasks);
-    } else {
-        console.log('No assignee found with this name.');
+        const data = await res.json();
+        return data || [];
+    } catch (error) {
+        // Handle network or parsing errors
+        console.error('Error fetching user tasks:', error);
+        return [];
     }
-
-    return assignee?.tasks || [];
 }
+
 
 const UserTasks: React.FC<UserTasksProps> = async ({ params }) => {
-    const { name } = params;
-    const tasks = await getUserTasks(name);
+    const { name } = await params; // Await the params object
+    const tasks: Task[] = await getUserTasks(name);
 
-    // const formattedDate = format(new Date(), 'do MMMM yyyy', { locale: sv });
+    if (!tasks) {
+        return <p className="text-center text-lg text-gray-400">Error fetching tasks for {name.charAt(0).toUpperCase() + name.slice(1)}.</p>;
+    }
+
+    if (tasks.length === 0) {
+        return <p className="text-center text-lg text-gray-400">No tasks found for {name.charAt(0).toUpperCase() + name.slice(1)}.</p>;
+    }
 
     return (
         <main className="flex flex-col items-center text-white mt-20 px-4">
@@ -45,21 +59,17 @@ const UserTasks: React.FC<UserTasksProps> = async ({ params }) => {
             <Divider />
 
             <div className="flex flex-col gap-8 mt-10 w-full max-w-[1000px] mx-auto">
-                {tasks.length > 0 ? (
-                    tasks.map((task) => (
-                        <Card
-                            key={task.id}
-                            id={task.id as any}
-                            name={name.charAt(0).toUpperCase() + name.slice(1)} // Capitalize the name
-                            date={new Date(task.createdAt).toLocaleDateString()}
-                            title={task.title}
-                            description={task.description || 'No description provided.'}
-                            isDone={task.completed}
-                        />
-                    ))
-                ) : (
-                    <p className="text-center text-lg text-gray-400">No tasks found for {name.charAt(0).toUpperCase() + name.slice(1)}.</p>
-                )}
+                {tasks.map((task) => (
+                    <Card
+                        key={task.id}
+                        id={task.id}
+                        name={name.charAt(0).toUpperCase() + name.slice(1)} // Capitalize the name
+                        date={new Date(task.createdAt).toLocaleDateString()}
+                        title={task.title}
+                        description={task.description || 'No description provided.'}
+                        isDone={task.completed}
+                    />
+                ))}
             </div>
         </main>
     );

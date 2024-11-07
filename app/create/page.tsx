@@ -2,10 +2,12 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
-
+import { v4 as uuidv4 } from 'uuid';
+import Image from "next/image";
 interface ContentBlock {
+    id: string; // Using UUID for uniqueness
     type: "text" | "image";
-    content: string;
+    content: string; // dataURL or imageUrl
     file?: File;
 }
 
@@ -16,6 +18,12 @@ const Create: React.FC = () => {
     const [contentBlocks, setContentBlocks] = useState<ContentBlock[]>([]);
     const [currentText, setCurrentText] = useState<string>("");
     const router = useRouter();
+
+    // Access the API base URL from environment variables
+    const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "";
+
+    // Unique ID generator for content blocks
+    const generateId = () => uuidv4();
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setInput(e.target.value);
@@ -35,7 +43,12 @@ const Create: React.FC = () => {
 
     const handleAddTextBlock = () => {
         if (currentText.trim() !== "") {
-            setContentBlocks([...contentBlocks, { type: "text", content: currentText }]);
+            const newBlock: ContentBlock = {
+                id: generateId(),
+                type: "text",
+                content: currentText,
+            };
+            setContentBlocks([...contentBlocks, newBlock]);
             setCurrentText("");
         }
     };
@@ -43,42 +56,63 @@ const Create: React.FC = () => {
     const handleAddImageBlock = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
+            const id = generateId();
+
+            // Create a temporary preview using FileReader
             const reader = new FileReader();
             reader.onloadend = () => {
-                setContentBlocks([...contentBlocks, { type: "image", content: reader.result as string, file }]);
+                const newBlock: ContentBlock = {
+                    id,
+                    type: "image",
+                    content: reader.result as string, // Temporary dataURL for preview
+                    file, // Store the file for later upload
+                };
+                setContentBlocks((prevBlocks) => [...prevBlocks, newBlock]);
             };
             reader.readAsDataURL(file);
         }
+        // Reset the input value to allow uploading the same file again if needed
         e.target.value = "";
     };
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+
         const formData = new FormData();
+
         const name = (e.currentTarget.elements.namedItem("name") as HTMLSelectElement).value;
         const title = (e.currentTarget.elements.namedItem("title") as HTMLInputElement).value;
         const date = (e.currentTarget.elements.namedItem("date") as HTMLInputElement).value;
+
+        // Validation
+        if (!name || !title) {
+            toast.error("Name and Title are required");
+            return;
+        }
 
         formData.append("name", name);
         formData.append("title", title);
         formData.append("date", date);
 
-        const contentBlocksWithoutFiles = contentBlocks.map((block) => {
-            if (block.type === "image") {
-                return { type: block.type, content: "" };
-            }
-            return block;
-        });
-        formData.append("contentBlocks", JSON.stringify(contentBlocksWithoutFiles));
+        // Serialize contentBlocks to JSON
+        const serializedContentBlocks = JSON.stringify(
+            contentBlocks.map((block) => ({
+                type: block.type,
+                content: block.type === "text" ? block.content : undefined,
+                file: block.type === "image" && block.file ? block.file.name : undefined,
+            }))
+        );
+        formData.append("contentBlocks", serializedContentBlocks);
 
-        contentBlocks.forEach((block, index) => {
+        // Append image files separately
+        contentBlocks.forEach((block) => {
             if (block.type === "image" && block.file) {
-                formData.append(`image_${index}`, block.file);
+                formData.append(`imageFiles`, block.file);
             }
         });
 
         try {
-            const response = await fetch("/api/create-task", {
+            const response = await fetch(`${API_BASE_URL}/api/create-task`, {
                 method: "POST",
                 body: formData,
             });
@@ -87,13 +121,16 @@ const Create: React.FC = () => {
                 router.push("/");
                 toast.success("Task created successfully");
             } else {
-                console.error("Error creating task");
-                toast.error("Error creating task");
+                const errorData = await response.json();
+                console.error("Error creating task:", errorData.error);
+                toast.error(errorData.error || "Error creating task");
             }
         } catch (error) {
             console.error("Error submitting form", error);
+            toast.error("Error submitting form");
         }
     };
+
 
     return (
         <div className="mx-auto">
@@ -116,7 +153,9 @@ const Create: React.FC = () => {
                                 Access
                             </button>
                         </form>
-                        {isIncorrect && <p className="text-red-500 text-lg mt-2">Incorrect password. Access denied!</p>}
+                        {isIncorrect && (
+                            <p className="text-red-500 text-lg mt-2">Incorrect password. Access denied!</p>
+                        )}
                     </div>
                 </div>
             ) : (
@@ -129,7 +168,12 @@ const Create: React.FC = () => {
                             <label htmlFor="name" className="block text-white text-lg">
                                 Name
                             </label>
-                            <select id="name" name="name" className="border p-2 w-full bg-gray-700 text-white mt-2">
+                            <select
+                                id="name"
+                                name="name"
+                                className="border p-2 w-full bg-gray-700 text-white mt-2"
+                                required
+                            >
                                 <option value="">Select a name</option>
                                 <option value="Albin">Albin</option>
                                 <option value="Marcus">Marcus</option>
@@ -144,21 +188,46 @@ const Create: React.FC = () => {
                             <label htmlFor="title" className="block text-white text-lg mt-4">
                                 Title
                             </label>
-                            <input type="text" id="title" name="title" className="border p-2 w-full bg-gray-700 text-white mt-2" />
+                            <input
+                                type="text"
+                                id="title"
+                                name="title"
+                                className="border p-2 w-full bg-gray-700 text-white mt-2"
+                                required
+                            />
 
                             <label htmlFor="date" className="block text-white text-lg mt-4">
                                 Date
                             </label>
                             {/* default date to today */}
-                            <input type="date" id="date" name="date" className="border p-2 w-full bg-gray-700 text-white mt-2" defaultValue={new Date().toISOString().split("T")[0]} />
+                            <input
+                                type="date"
+                                id="date"
+                                name="date"
+                                className="border p-2 w-full bg-gray-700 text-white mt-2"
+                                defaultValue={new Date().toISOString().split("T")[0]}
+                                suppressHydrationWarning
+                            />
 
                             <label className="block text-white text-lg mt-4">Content</label>
                             <div className="border p-4 w-full bg-gray-800 mt-2 rounded">
-                                {contentBlocks.map((block, index) => (
-                                    <div key={index} className="my-4">
-                                        {block.type === "text" && <p className="text-white whitespace-pre-wrap">{block.content}</p>}
+                                {contentBlocks.map((block) => (
+                                    <div key={block.id} className="my-4">
+                                        {block.type === "text" && (
+                                            <p className="text-white whitespace-pre-wrap">{block.content}</p>
+                                        )}
                                         {block.type === "image" && (
-                                            <img src={block.content} alt={`Uploaded ${index}`} className="max-w-full rounded" />
+                                            <Image
+                                                src={
+                                                    block.content.startsWith("/uploads/")
+                                                        ? `${API_BASE_URL}${block.content}`
+                                                        : block.content // Handle both dataURL and imageUrl
+                                                }
+                                                alt={`Uploaded ${block.id}`}
+                                                className="max-w-full rounded"
+                                                width={500}
+                                                height={300}
+                                            />
                                         )}
                                     </div>
                                 ))}
@@ -173,28 +242,32 @@ const Create: React.FC = () => {
                             <button
                                 type="button"
                                 onClick={handleAddTextBlock}
-                                className='bg-secondary text-black px-4 py-2 mt-2'
+                                className="bg-secondary text-black px-4 py-2 mt-2"
                             >
                                 Add Text
                             </button>
 
                             {/* Input for adding image */}
-                            <label htmlFor="image" className='block text-white text-lg mt-6'>Upload Image</label>
+                            <label htmlFor="image" className="block text-white text-lg mt-6">
+                                Upload Image
+                            </label>
                             <input
                                 type="file"
                                 id="image"
-                                className='border p-2 w-full text-white cursor-pointer bg-gray-700 mt-2'
+                                className="border p-2 w-full text-white cursor-pointer bg-gray-700 mt-2"
                                 accept="image/*"
                                 onChange={handleAddImageBlock}
                             />
 
-                            <button type="submit" className='bg-secondary text-black px-6 py-2 mt-6'>Create</button>
+                            <button type="submit" className="bg-secondary text-black px-6 py-2 mt-6">
+                                Create
+                            </button>
                         </form>
                     </div>
                 </div>
             )}
         </div>
-    )
-}
+    );
+};
 
-export default Create
+export default Create;

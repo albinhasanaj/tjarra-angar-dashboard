@@ -1,25 +1,31 @@
 // app/tasks/[id]/page.tsx
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { PrismaClient } from '@prisma/client';
 import Link from 'next/link';
-import { format } from 'date-fns';
-import { sv } from 'date-fns/locale';
-
-
-const prisma = new PrismaClient();
 
 interface TaskProps {
     params: Promise<{ id: string }>;
 }
 
-// Fetch task data based on the dynamic ID
+
+// Fetch task data from the Express API
 async function getTask(id: string) {
-    const task = await prisma.task.findUnique({
-        where: { id: parseInt(id, 10) },
-        include: { assignee: true },
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/get-task/${id}`, {
+        cache: 'no-store',
     });
-    return task;
+
+    if (!res.ok) {
+        console.error(`Error fetching task: ${res.statusText}`);
+        return null;
+    }
+
+    try {
+        const task = await res.json();
+        return task;
+    } catch (error) {
+        console.error('Error parsing JSON:', error);
+        return null;
+    }
 }
 
 // Generate metadata for the page
@@ -32,6 +38,7 @@ export async function generateMetadata({ params }: TaskProps): Promise<Metadata>
     return { title: task.title };
 }
 
+
 // Main component to display task details
 const TaskPage = async ({ params }: TaskProps) => {
     const { id } = await params;
@@ -41,15 +48,13 @@ const TaskPage = async ({ params }: TaskProps) => {
         notFound();
     }
 
-    // const formattedDate = format(new Date(task.createdAt), 'do MMMM yyyy', { locale: sv });
-
     return (
         <main className="flex flex-col items-center text-white mt-20 px-4">
             <h1 className="text-2xl mb-4">{task.title}</h1>
             <p className="text-lg mb-2">Assigned to: {task.assignee.name}</p>
-            <p className="text-sm text-gray-500 mb-4">
+            <time dateTime={task.createdAt} className="text-sm text-gray-500 mb-4">
                 {new Date(task.createdAt).toLocaleDateString()}
-            </p>
+            </time>
             <div
                 className="prose prose-invert text-xl flex flex-col items-center max-w-[1000px] text-left mb-20"
                 dangerouslySetInnerHTML={{ __html: task.content || 'No content available.' }}

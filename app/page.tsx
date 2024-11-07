@@ -2,17 +2,40 @@
 import React from 'react';
 import Card from '@/components/Card';
 import Divider from '@/components/Divider';
-import { format } from 'date-fns';
-import { sv } from 'date-fns/locale';
+
+interface Task {
+  id: string;
+  assignee?: {
+    name?: string;
+  };
+  createdAt: string;
+  title: string;
+  description?: string;
+  completed: boolean;
+}
+
 
 const Homepage = async () => {
-  // Fetch data from the API route
-  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/get-all-tasks`, {
-    cache: 'no-store', // Ensures fresh data for each request
-  });
-  const tasks = await res.json();
 
-  // const formattedDate = format(new Date(), 'do MMMM yyyy', { locale: sv });
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/get-all-tasks`, {
+    cache: 'no-store',
+  });
+
+  if (!res.ok) {
+    console.error(`HTTP error! status: ${res.status}`);
+    // Optionally, handle the error in the UI
+    return;
+  }
+
+  let tasks: Task[] = [];
+  try {
+    tasks = await res.json();
+  } catch (error) {
+    console.error('Error parsing JSON:', error);
+    // Optionally, handle the error in the UI
+    return;
+  }
+
 
   return (
     <main className="flex flex-col items-center text-white mt-20 px-4">
@@ -20,7 +43,7 @@ const Homepage = async () => {
       <Divider />
 
       <div className="flex flex-col gap-8 mt-10 w-full max-w-[1000px] mx-auto">
-        {tasks.map((task: any) => (
+        {tasks.map((task) => (
           <Card
             key={task.id}
             id={task.id}

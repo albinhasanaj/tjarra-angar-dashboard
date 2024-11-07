@@ -8,23 +8,29 @@ const Card = ({ name, id, date, title, description, isDone }: { name: string, da
     const [done, setDone] = useState(isDone)
 
 
-    // fetch request to update the task status
     const handleDone = async () => {
-        const res = await fetch('/api/update-task', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ id, completed: !done })
-        })
+        try {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/update-task/${id}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ completed: !done }),
+            });
 
-        if (res.ok) {
-            setDone(!done)
-            toast.success('Task status updated successfully')
-        } else {
-            toast.error('Something went wrong')
+            if (res.ok) {
+                setDone(!done);
+                toast.success('Task status updated successfully');
+            } else {
+                const errorData = await res.json();
+                toast.error(errorData.error || 'Something went wrong');
+            }
+        } catch (error) {
+            console.error('Error updating task status:', error);
+            toast.error('Something went wrong');
         }
-    }
+    };
+
 
 
     return (
@@ -32,7 +38,7 @@ const Card = ({ name, id, date, title, description, isDone }: { name: string, da
             {/* Name and Date Section */}
             <div className="text-center md:text-left">
                 <p className="font-semibold text-lg">{name}</p>
-                <p className="text-sm text-gray-500">{date}</p>
+                <time dateTime={date} className="text-sm text-gray-500" suppressHydrationWarning>{date}</time>
             </div>
 
             {/* Title and Description Section */}
