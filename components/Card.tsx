@@ -7,7 +7,6 @@ import toast from 'react-hot-toast'
 const Card = ({ name, id, date, title, description, isDone }: { name: string, date: string, title: string, description: string, isDone: boolean, id: string }) => {
     const [done, setDone] = useState(isDone)
 
-
     const handleDone = async () => {
         try {
             const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/update-task/${id}`, {
@@ -44,7 +43,6 @@ const Card = ({ name, id, date, title, description, isDone }: { name: string, da
             {/* Title and Description Section */}
             <div className="text-center md:text-left">
                 <p className="font-semibold text-lg">{title}</p>
-                <p className="text-sm text-gray-600">{description}</p>
             </div>
 
             {/* View More Link */}

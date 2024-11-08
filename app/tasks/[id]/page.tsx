@@ -49,14 +49,14 @@ const TaskPage = async ({ params }: TaskProps) => {
     }
 
     return (
-        <main className="flex flex-col items-center text-white mt-20 px-4">
+        <main className="flex flex-col gap-4 items-center text-white mt-20 mb-20 px-4">
             <h1 className="text-2xl mb-4">{task.title}</h1>
             <p className="text-lg mb-2">Assigned to: {task.assignee.name}</p>
             <time dateTime={task.createdAt} className="text-sm text-gray-500 mb-4">
                 {new Date(task.createdAt).toLocaleDateString()}
             </time>
             <div
-                className="prose prose-invert text-xl flex flex-col items-center max-w-[1000px] text-left mb-20"
+                className="prose prose-invert text-xl flex flex-col items-center max-w-[1000px] text-left mb-20 gap-4 leading-8"
                 dangerouslySetInnerHTML={{ __html: task.content || 'No content available.' }}
             />
 

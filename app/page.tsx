@@ -39,10 +39,10 @@ const Homepage = async () => {
 
   return (
     <main className="flex flex-col items-center text-white mt-20 px-4">
-      <h3 className="text-xl mb-4">Tasks assigned by date</h3>
+      <h3 className="text-xl mb-20">Tasks assigned by date</h3>
       <Divider />
 
-      <div className="flex flex-col gap-8 mt-10 w-full max-w-[1000px] mx-auto">
+      <div className="flex flex-col gap-8 mt-10 w-full max-w-[1000px] mx-auto mb-20">
         {tasks.map((task) => (
           <Card
             key={task.id}
