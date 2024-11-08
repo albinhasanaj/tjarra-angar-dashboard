@@ -82,13 +82,21 @@ const Create: React.FC = () => {
 
         const name = (e.currentTarget.elements.namedItem("name") as HTMLSelectElement).value;
         const title = (e.currentTarget.elements.namedItem("title") as HTMLInputElement).value;
-        const date = (e.currentTarget.elements.namedItem("date") as HTMLInputElement).value;
+        const dateInput = (e.currentTarget.elements.namedItem("date") as HTMLInputElement).value;
 
         // Validation
         if (!name || !title) {
             toast.error("Name and Title are required");
             return;
         }
+
+        // Get current time
+        const now = new Date();
+        const hours = String(now.getHours()).padStart(2, "0");
+        const minutes = String(now.getMinutes()).padStart(2, "0");
+        const seconds = String(now.getSeconds()).padStart(2, "0");
+        const dateTime = `${dateInput}T${hours}:${minutes}:${seconds}`;
+        const date = new Date(dateTime).toISOString();
 
         formData.append("name", name);
         formData.append("title", title);
