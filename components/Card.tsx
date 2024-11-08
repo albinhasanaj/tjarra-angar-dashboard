@@ -4,7 +4,7 @@ import React, { useState } from 'react'
 import { AiOutlineCheckCircle, AiOutlineCloseCircle } from 'react-icons/ai'
 import toast from 'react-hot-toast'
 
-const Card = ({ name, id, date, title, description, isDone }: { name: string, date: string, title: string, description: string, isDone: boolean, id: string }) => {
+const Card = ({ name, id, date, title, isDone }: { name: string, date: string, title: string, isDone: boolean, id: string }) => {
     const [done, setDone] = useState(isDone)
 
     const handleDone = async () => {
