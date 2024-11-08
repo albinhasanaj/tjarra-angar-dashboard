@@ -50,7 +50,6 @@ const Homepage = async () => {
             name={task.assignee?.name || 'No Assignee'}
             date={new Date(task.createdAt).toLocaleDateString()}
             title={task.title}
-            description={task.description || 'No description provided.'}
             isDone={task.completed}
           />
         ))}
