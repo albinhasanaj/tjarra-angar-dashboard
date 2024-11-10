@@ -11,7 +11,7 @@ interface Task {
   createdAt: string;
   title: string;
   description?: string;
-  completed: boolean;
+  status: string;
 }
 
 
@@ -50,7 +50,7 @@ const Homepage = async () => {
             name={task.assignee?.name || 'No Assignee'}
             date={new Date(task.createdAt).toLocaleDateString()}
             title={task.title}
-            isDone={task.completed}
+            initialStatus={task.status}
           />
         ))}
       </div>

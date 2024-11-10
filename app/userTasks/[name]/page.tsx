@@ -11,7 +11,7 @@ interface Task {
     id: string;
     createdAt: string;
     title: string;
-    completed: boolean;
+    status: string;
 }
 
 
@@ -65,7 +65,7 @@ const UserTasks: React.FC<UserTasksProps> = async ({ params }) => {
                         name={name.charAt(0).toUpperCase() + name.slice(1)} // Capitalize the name
                         date={new Date(task.createdAt).toLocaleDateString()}
                         title={task.title}
-                        isDone={task.completed}
+                        initialStatus={task.status}
                     />
                 ))}
             </div>

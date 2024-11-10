@@ -1,24 +1,34 @@
 "use client"
 import Link from 'next/link'
 import React, { useState } from 'react'
-import { AiOutlineCheckCircle, AiOutlineCloseCircle } from 'react-icons/ai'
+import { AiOutlineCheckCircle, AiOutlineCloseCircle, AiFillClockCircle } from 'react-icons/ai'
 import toast from 'react-hot-toast'
 
-const Card = ({ name, id, date, title, isDone }: { name: string, date: string, title: string, isDone: boolean, id: string }) => {
-    const [done, setDone] = useState(isDone)
+const Card = ({ name, id, date, title, initialStatus }: { name: string, date: string, title: string, initialStatus: string, id: string }) => {
+    const [status, setStatus] = useState(initialStatus);
 
-    const handleDone = async () => {
+    const handleStatus = async () => {
+        let newStatus;
+
+        if (status === 'NOT_DONE') {
+            newStatus = 'ONGOING';
+        } else if (status === 'ONGOING') {
+            newStatus = 'COMPLETED';
+        } else {
+            newStatus = 'NOT_DONE';
+        }
+
         try {
             const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/update-task/${id}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ completed: !done }),
+                body: JSON.stringify({ status: newStatus }),
             });
 
             if (res.ok) {
-                setDone(!done);
+                setStatus(newStatus);
                 toast.success('Task status updated successfully');
             } else {
                 const errorData = await res.json();
@@ -29,6 +39,7 @@ const Card = ({ name, id, date, title, isDone }: { name: string, date: string, t
             toast.error('Something went wrong');
         }
     };
+
 
 
 
@@ -55,11 +66,17 @@ const Card = ({ name, id, date, title, isDone }: { name: string, date: string, t
 
             {/* Status Icon with onClick */}
             <div className="flex justify-center md:justify-end">
-                {done ? (
-                    <AiOutlineCheckCircle onClick={handleDone} className="text-green-500 text-4xl cursor-pointer hover:scale-105 transition-all duration-300" />
-                ) : (
-                    <AiOutlineCloseCircle onClick={handleDone} className="text-red-500 text-4xl cursor-pointer hover:scale-105 transition-all duration-300" />
-                )}
+
+                <div className="flex justify-center md:justify-end">
+                    {status === 'NOT_DONE' ? (
+                        <AiOutlineCloseCircle onClick={handleStatus} className="text-red-500 text-4xl cursor-pointer hover:scale-105 transition-all duration-300" />
+                    ) : status === 'ONGOING' ? (
+                        <AiFillClockCircle onClick={handleStatus} className="text-yellow-500 text-4xl cursor-pointer hover:scale-105 transition-all duration-300" />
+                    ) : (
+                        <AiOutlineCheckCircle onClick={handleStatus} className="text-green-500 text-4xl cursor-pointer hover:scale-105 transition-all duration-300" />
+                    )}
+                </div>
+
             </div>
         </div>
     )
