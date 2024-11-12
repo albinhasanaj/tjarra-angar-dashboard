@@ -9,7 +9,7 @@ const Navbar: React.FC = () => {
     const currentPath = usePathname()
 
 
-    const names = ['Albin', 'Marcus', 'Simon', 'Elias', 'Jim', 'Oscar', 'Leo', 'Axel']
+    const names = ['Albin', 'Marcus', 'Simon', 'Elias', 'Jim', 'Oscar', 'Leo', 'Axel', 'Hörnell']
 
     return (
         <div>

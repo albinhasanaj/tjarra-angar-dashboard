@@ -191,6 +191,7 @@ const Create: React.FC = () => {
                                 <option value="Oscar">Oscar</option>
                                 <option value="Leo">Leo</option>
                                 <option value="Axel">Axel</option>
+                                <option value="Hörnell">Hörnell</option>
                             </select>
 
                             <label htmlFor="title" className="block text-white text-lg mt-4">
