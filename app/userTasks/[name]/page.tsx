@@ -17,7 +17,6 @@ interface Task {
 
 async function getUserTasks(name: string) {
     // Capitalize the first letter of the name
-
     try {
         // Fetch tasks from the Express API
         const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/user-tasks/${name}`, {
@@ -31,6 +30,7 @@ async function getUserTasks(name: string) {
         }
 
         const data = await res.json();
+
         return data || [];
     } catch (error) {
         // Handle network or parsing errors
@@ -41,8 +41,15 @@ async function getUserTasks(name: string) {
 
 
 const UserTasks: React.FC<UserTasksProps> = async ({ params }) => {
-    const { name } = await params; // Await the params object
+    let { name } = await params; // Await the params object
+
+
     const tasks: Task[] = await getUserTasks(name);
+
+    // Decode the name if it contains special characters
+    if (name.includes('%')) {
+        name = decodeURIComponent(name);
+    }
 
     if (!tasks) {
         return <p className="text-center text-lg text-gray-400">Error fetching tasks for {name.charAt(0).toUpperCase() + name.slice(1)}.</p>;
