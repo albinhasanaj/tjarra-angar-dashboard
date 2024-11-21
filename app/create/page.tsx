@@ -32,7 +32,7 @@ const Create: React.FC = () => {
 
     const handleAccess = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        const correctPassword = "joel";
+        const correctPassword = process.env.NEXT_PUBLIC_PASSWORD!;
         if (input === correctPassword) {
             setIsAuthorized(true);
             setIsIncorrect(false);
